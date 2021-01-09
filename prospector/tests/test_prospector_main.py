@@ -10,10 +10,11 @@ import filter
 import rank
 import main
 
-os.chdir('../database_creation')
-sys.path.insert(1, '../database_creation')
+#TODO: Restore these lines
+#os.chdir('../database_creation')
+#sys.path.insert(1, '../database_creation')
 
-import database_creation
+import database
 
 GIT_CACHE = '/mnt/c/Users/I537960/Documents/git_explorer_cache'
 os.environ['GIT_CACHE'] = '/mnt/c/Users/I537960/Documents/git_explorer_cache'
@@ -40,19 +41,19 @@ def example_vulnerability():
     return example_vulnerability
 
 # databases are created in the notebook database_creation.ipynb
-vulnerabilities_connection, vulnerabilities_cursor = database_creation.connect_with_vulnerabilities_database('test-vulnerabilities.db')
-prospector_connection, prospector_cursor = database_creation.connect_with_database('test-commits.db')
+vulnerabilities_connection, vulnerabilities_cursor = database.connect_with_vulnerabilities_database('test-vulnerabilities.db')
+prospector_connection, prospector_cursor = database.connect_with_database('test-commits.db')
 
 @pytest.mark.database
 def test_database_coverage(example_vulnerability):
-    database_creation.add_vulnerabiliy_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['repo_url'], example_vulnerability['description'], str(example_vulnerability['nvd_published_timestamp']))
+    database.add_vulnerability_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['repo_url'], example_vulnerability['description'], str(example_vulnerability['nvd_published_timestamp']))
     assert vulnerabilities_cursor.execute("SELECT COUNT(vulnerability_id) FROM vulnerabilities WHERE vulnerability_id = :vulnerability_id;", {'vulnerability_id':example_vulnerability['vulnerability_id']}).fetchone()['COUNT(vulnerability_id)'] == 1
 
-    database_creation.add_vulnerability_references_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['nvd_references'])
+    database.add_vulnerability_references_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['nvd_references'])
     assert vulnerabilities_cursor.execute("SELECT COUNT(url) FROM vulnerability_references WHERE vulnerability_id = :vulnerability_id;", {'vulnerability_id':example_vulnerability['vulnerability_id']}).fetchone()['COUNT(url)'] == 2
     assert vulnerabilities_cursor.execute("SELECT COUNT(url) FROM advisory_references WHERE vulnerability_id = :vulnerability_id;", {'vulnerability_id':example_vulnerability['vulnerability_id']}).fetchone()['COUNT(url)'] == 35
 
-    database_creation.add_vulnerability_fixes_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['fix_commits'], example_vulnerability['repo_url'])
+    database.add_vulnerability_fixes_to_database(vulnerabilities_connection, example_vulnerability['vulnerability_id'], example_vulnerability['fix_commits'], example_vulnerability['repo_url'])
     assert vulnerabilities_cursor.execute("SELECT COUNT(commit_id) FROM fix_commits WHERE vulnerability_id = :vulnerability_id;", {'vulnerability_id':example_vulnerability['vulnerability_id']}).fetchone()['COUNT(commit_id)'] == 1
 
 @pytest.mark.database

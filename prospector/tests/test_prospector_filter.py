@@ -13,12 +13,13 @@ os.chdir('../../prospector')
 sys.path.insert(1, '../prospector')
 
 import filter
-import database_creation
+import database
 
 os.chdir(current_working_directory)
 
-os.chdir('../../database_creation')
-sys.path.insert(1, '../database_creation')
+#TODO: Restore these lines
+#os.chdir('../../database_creation')
+#sys.path.insert(1, '../database_creation')
 
 GIT_CACHE = '/mnt/c/Users/I537960/Documents/git_explorer_cache'
 os.environ['GIT_CACHE'] = '/mnt/c/Users/I537960/Documents/git_explorer_cache'
@@ -383,6 +384,6 @@ def test_map_advisory_record_onto_candidate_commits_errors(advisory_record=dict(
 
 @pytest.mark.filter
 def test_filter_commits_on_files_changed_extensions(example_advisory_record):
-    prospector_connection, prospector_cursor = database_creation.connect_with_database('../data/prospector-commits.db')
+    prospector_connection, prospector_cursor = database.connect_with_database('../data/prospector-commits.db')
     candidate_commits = filter.map_advisory_record_onto_candidate_commits(example_advisory_record)
     assert len(filter.filter_commits_on_files_changed_extensions(candidate_commits, prospector_connection, prospector_cursor)) == 11
