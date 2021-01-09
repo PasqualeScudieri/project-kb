@@ -515,10 +515,11 @@ def add_tags_to_database(connection, tags=None, git_repo=None, repo_url=None, ve
             tag_timestamp = filter.get_timestamp_for_tag(tag, git_repo)
 
             # add to database
-            cursor.execute("INSERT INTO tags VALUES (:tag, :repo_url, :tag_timestamp)",
-                {'tag':tag, 'repo_url':repo_url, 'tag_timestamp':str(tag_timestamp)})
-        except:
+            cursor.execute("INSERT INTO tags VALUES (:tag, :repo_url, :tag_timestamp, :cleaned_tag, :tag_order_index)",
+                {'tag':tag, 'repo_url':repo_url, 'tag_timestamp':str(tag_timestamp),'cleaned_tag':"",'tag_order_index':int(-1)})
+        except Exception as e: # work on python 3.x
             print('    Failed to add tag {}'.format(tag))
+            print('Error: '+ str(e))
 
     connection.commit()
     if verbose: print('    {} / {} tags were already in the database and added the rest.'.format(len(tags_already_in_the_db), len(tags)))
