@@ -155,8 +155,12 @@ def main(vulnerability_id, verbose, description=None, published_timestamp=None, 
         else:
             print('Provide the name of the affected project:')
             project_name = input()
-
-    references_content = tuple(pd.read_sql("SELECT vulnerability_id, url, preprocessed_content FROM vulnerability_references WHERE vulnerability_id = '{}' AND url IN {}".format(vulnerability_id, tuple(references)), vulnerabilities_connection).preprocessed_content)
+    references_for_query = ''
+    if len(references) == 1:
+        references_for_query = "('"+references[0]+"')"
+    else:  
+        references_for_query = tuple(references)
+    references_content = tuple(pd.read_sql("SELECT vulnerability_id, url, preprocessed_content FROM vulnerability_references WHERE url IN {} and vulnerability_id = '{}'".format(references_for_query, vulnerability_id), vulnerabilities_connection).preprocessed_content)
     references_content = rank.extract_n_most_occurring_words(rank.remove_forbidden_words_from_string(string=' '.join(references_content), forbidden_words = rank.reference_stopwords + project_name.split(' ')), n=20)
 
     # @TODO: now adding all advisory references --> change to only using the provided references
